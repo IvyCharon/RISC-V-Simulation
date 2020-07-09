@@ -33,7 +33,6 @@ public:
                     now_pos <<= 4;
                     now_pos += hex_to_dec(tmp);
                 }
-                //cout<<now_pos<<"\n";
             }
             else
             {
@@ -42,7 +41,6 @@ public:
                 k <<= 4;
                 k += hex_to_dec(tmp);
                 mem[now_pos ++] = k;
-                //cout<<now_pos - 1<<" "<<mem[now_pos - 1]<<"\n";
             }
         }
     }
@@ -85,7 +83,6 @@ public:
 
     int LoadWord(int pos)
     {
-        int out = mem[pos] + (mem[pos + 1] << 8) + (mem[pos + 2] << 16) + (mem[pos +3] << 24);
-        return out;
+        return mem[pos] + (mem[pos + 1] << 8) + (mem[pos + 2] << 16) + (mem[pos +3] << 24);
     }
 };
