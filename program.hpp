@@ -67,8 +67,6 @@ class program
             break;
         }
         rReg.data1 = Reg[instr.rs1]; rReg.data2 = Reg[instr.rs2];
-        //if((instr.type == JAL || instr.type == JALR) && instr.rd == 0)
-        //    instr.rd = 1;
         wReg.number = instr.rd;
     }
 
@@ -82,7 +80,6 @@ public:
     void IF()//根据PC寄存器访问内存得到指令
     {
         now_code = memo.get_instruction(pc);
-        //std::cout<<std::hex<<pc<<" ";std::cout<<std::bitset<32>(now_code)<<"\n";
     }
     void ID()//根据指令类型找到作为右值的寄存器并读值、并且解析立即数的值
     {
@@ -454,34 +451,15 @@ public:
 
     int run()
     {
-        int i = 0;
         while (1)
         {
-            //cout<<++ i<<" ";
             IF();
-            /*if(i <= 18)
-            {
-                cout<<"before: ";
-                for(int j = 0;j < 32;++ j)
-                    cout<<Reg[j]<<" ";
-                cout<<"\n";
-            }
-            cout<<now_code<<'\n';*/
             if(now_code == END)
                 return ((unsigned int)Reg[10]) & 255u;
             ID();
             EXE();
             MEM();
             WB();
-            /*if(i <= 18)
-            {
-                cout<<"after:  ";
-                for(int j = 0;j < 32;++ j)
-                    cout<<Reg[j]<<" ";
-                cout<<"\n";
-            }
-            cout<<"imm: "<<rReg.imm<<'\n';*/
-            //cout<<"shamt: "<<rReg.shamt<<"\n";
         }
     }
 };
