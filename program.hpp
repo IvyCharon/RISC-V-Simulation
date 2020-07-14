@@ -1,21 +1,4 @@
 //with 5 stage pipnlining
-//为什么可以加快速度？
-//实际上不能，硬件上，只是为了更好的理解硬件的执行
-//面对data_hazard和control_hazard的时候暂停流水要怎么暂停？暂停过后要怎么恢复？
-//分支预测
-/*
-假设是对的，执行下一条指令
-预测正确就执行正确
-要保证下一个指令卡在第三个阶段
-若跳转，就把这条指令删掉
-重新开始读指令
-二级分支预测算法
-*/
-/*
-三种stop:
-data_hazard
-control_hazard——mem中改了内存;exe时产生分支
-*/
 #include "memory.hpp"
 #include <iostream>
 #include <string.h>
