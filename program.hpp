@@ -19,7 +19,7 @@ class program
     struct branch_pre_cache
     {
         bool a[2] = {1,1};
-        int pos_c = 0, pos_nc = 0;
+        int pos_c = 0;
 
         void push(bool x)
         {
@@ -163,7 +163,6 @@ public:
         {
             if(bpc.jud())//跳转
             {
-                bpc.pos_nc = pc;
                 bpc.pos_c = pc - 4 + eReg.imm;
                 dReg.now_code = memo.get_instruction(bpc.pos_c);
                 dReg.pc = bpc.pos_c;
@@ -172,10 +171,14 @@ public:
             else//不跳转
             {
                 bpc.pos_c = pc;
-                bpc.pos_nc = pc - 4 + eReg.imm;
                 dReg.now_code = memo.get_instruction(pc);
                 dReg.pc = pc;
                 pc += 4;
+            }
+            if(dReg.now_code == END)
+            {
+                bpc.pos_c = -100;
+                dReg.now_code = -1;
             }
             return;
         }
