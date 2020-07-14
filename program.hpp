@@ -89,8 +89,7 @@ class program
 
     bool pc_changed(Types type)
     {
-        return (type == AUIPC) /*|| (type == BEQ) || (type == BNE) || (type == BLT) || 
-        (type == BGE) || (type == BLTU) || (type == BGEU)*/ || (type == JAL) || (type == JALR);
+        return (type == AUIPC) || (type == JAL) || (type == JALR);
     }
 
     bool branch(Types t)
