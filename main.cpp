@@ -5,6 +5,6 @@
 int main()
 {
     program myPro;
-    cout<<myPro.run();
+    cout<<myPro.FSPrun();
     return 0;
 }
