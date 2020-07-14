@@ -16,6 +16,43 @@ class program
 
     int cycle;
 
+    struct branch_pre_cache
+    {
+        bool a[2] = {1,1};
+        int pos_c = 0, pos_nc = 0;
+
+        void push(bool x)
+        {
+            if(a[0] == 1 && a[1] == 1)
+            {
+                if(x == 0) a[1] = 0;
+                return;
+            }
+            if(a[0] == 1 && a[1] == 0)
+            {
+                if(x == 1) a[1] = 1;
+                else a[0] = 0;
+                return;
+            }
+            if(a[0] == 0 && a[1] == 1)
+            {
+                if(x == 1) a[0] = 1;
+                else a[1] = 0;
+                return;
+            }
+            if(a[0] == 0 && a[1] == 0)
+            {
+                if(x == 1) a[1] = 1;
+                return;
+            }
+        }
+
+        bool jud()
+        {
+            return a[0];
+        }
+    }bpc;
+
     struct ID_Reg
     {
         int now_code = 0;
@@ -52,8 +89,13 @@ class program
 
     bool pc_changed(Types type)
     {
-        return (type == AUIPC) || (type == BEQ) || (type == BNE) || (type == BLT) || 
-        (type == BGE) || (type == BLTU) || (type == BGEU) || (type == JAL) || (type == JALR);
+        return (type == AUIPC) /*|| (type == BEQ) || (type == BNE) || (type == BLT) || 
+        (type == BGE) || (type == BLTU) || (type == BGEU)*/ || (type == JAL) || (type == JALR);
+    }
+
+    bool branch(Types t)
+    {
+        return (t == BEQ) || (t == BNE) || (t == BGEU) || (t == BLT) || (t == BLTU) || (t == BGE);
     }
 
     bool get_in_mem(Types t)
@@ -115,6 +157,26 @@ public:
         if(mem_changed(mReg.type) || mem_changed(eReg.type))
         {
             dReg.now_code = -1;
+            return;
+        }
+        if(branch(eReg.type))
+        {
+            if(bpc.jud())//跳转
+            {
+                bpc.pos_nc = pc;
+                bpc.pos_c = pc - 4 + eReg.imm;
+                dReg.now_code = memo.get_instruction(bpc.pos_c);
+                dReg.pc = bpc.pos_c;
+                pc += 4;
+            }
+            else//不跳转
+            {
+                bpc.pos_c = pc;
+                bpc.pos_nc = pc - 4 + eReg.imm;
+                dReg.now_code = memo.get_instruction(pc);
+                dReg.pc = pc;
+                pc += 4;
+            }
             return;
         }
         dReg.now_code = memo.get_instruction(pc);
@@ -396,40 +458,64 @@ public:
             pc = (eReg.data1 + eReg.imm) & 0xfffffffe;
             break;
         case BEQ:
-            pc -= 4;
             if(eReg.data1 == eReg.data2)
+            {
+                pc -= 4;
                 pc += eReg.imm;
-            else pc += 4;
+                bpc.push(1);
+            }   
+            else
+                bpc.push(0);
             break;
         case BNE:
-            pc -= 4;
             if(eReg.data1 != eReg.data2)
+            {
+                pc -= 4;
                 pc += eReg.imm;
-            else pc += 4;
+                bpc.push(1);
+            }   
+            else
+                bpc.push(0);
             break;
         case BLT:
-            pc -= 4;
             if(eReg.data1 < eReg.data2)
+            {
+                pc -= 4;
                 pc += eReg.imm;
-            else pc += 4;
+                bpc.push(1);
+            }   
+            else
+                bpc.push(0);
             break;
         case BGE:
-            pc -= 4;
             if(eReg.data1 >= eReg.data2)
+            {
+                pc -= 4;
                 pc += eReg.imm;
-            else pc += 4;
+                bpc.push(1);
+            }   
+            else
+                bpc.push(0);
             break;
         case BLTU:
-            pc -= 4;
             if(((unsigned int)eReg.data1) < ((unsigned int)eReg.data2))
+            {
+                pc -= 4;
                 pc += eReg.imm;
-            else pc += 4;
+                bpc.push(1);
+            }   
+            else
+                bpc.push(0);
             break;
         case BGEU:
-            pc -= 4;
             if(((unsigned int)eReg.data1) >= ((unsigned int)eReg.data2))
+            {
+                pc -= 4;
                 pc += eReg.imm;
-            else pc += 4;
+                bpc.push(1);
+            }   
+            else
+                bpc.push(0);
             break;
         case LB:
         case LH:
@@ -526,6 +612,16 @@ public:
             mReg.isChanged = 1;
             mReg.data = eReg.data1 & eReg.data2;
             break;
+        }
+        if(branch(eReg.type))
+        {
+            if(pc == bpc.pos_c) return;
+            else
+            {
+                dReg.now_code = memo.get_instruction(pc);
+                dReg.pc = pc;
+                pc += 4;
+            }
         }
     }
     void MEM()//根据计算出的地址从内存读出数据值，或将已准备好的数据值写入内存
