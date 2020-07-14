@@ -94,11 +94,7 @@ public:
     program() 
     {
         memset(Reg, 0, sizeof(Reg));
-        now_code = 0;
         pc = 0;
-        cycle = 0;
-
-        data_hazard = control_hazard = 0;
     }
     void IF()//根据PC寄存器访问内存得到指令
     {
