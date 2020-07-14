@@ -615,12 +615,11 @@ public:
         }
         if(branch(eReg.type))
         {
-            if(pc == bpc.pos_c) return;
+            if(pc - 4 == bpc.pos_c) return;
             else
             {
-                dReg.now_code = memo.get_instruction(pc);
-                dReg.pc = pc;
-                pc += 4;
+                dReg.now_code = memo.get_instruction(pc - 4);
+                dReg.pc = pc - 4;
             }
         }
     }
