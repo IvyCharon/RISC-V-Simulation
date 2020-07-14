@@ -1,4 +1,16 @@
 //with 5 stage pipnlining
+//为什么可以加快速度？
+//实际上不能，硬件上，只是为了更好的理解硬件的执行
+//面对data_hazard和control_hazard的时候暂停流水要怎么暂停？暂停过后要怎么恢复？
+//分支预测
+/*
+假设是对的，执行下一条指令
+预测正确就执行正确
+要保证下一个指令卡在第三个阶段
+若跳转，就把这条指令删掉
+重新开始读指令
+二级分支预测算法
+*/
 #include "memory.hpp"
 #include <iostream>
 #include <string.h>
@@ -13,6 +25,8 @@ class program
     Memory_simu memo;
     int Reg[32];
     int pc;
+
+    int cycle;
 
     struct ID_Reg
     {
@@ -95,9 +109,16 @@ public:
     {
         memset(Reg, 0, sizeof(Reg));
         pc = 0;
+        cycle = 0;
     }
     void IF()//根据PC寄存器访问内存得到指令
     {
+        if(cycle)
+        {
+            dReg.now_code = -1;
+            cycle --;
+            return;
+        }
         if(pc_changed(eReg.type))
         {
             dReg.now_code = -1;
@@ -349,6 +370,11 @@ public:
             default:
                 break;
             }
+        }
+        if(get_in_mem(eReg.type))
+        {
+            cycle = 3;
+            return;
         }
     }
     void EXE()//对解析好的值按指令要求进行计算
