@@ -15,6 +15,7 @@ class program
     int pc;
 
     int cycle;
+    bool isend;
 
     struct branch_pre_cache
     {
@@ -139,6 +140,7 @@ public:
         memset(Reg, 0, sizeof(Reg));
         pc = 0;
         cycle = 0;
+        isend = 0;
     }
     void IF()//根据PC寄存器访问内存得到指令
     {
@@ -622,6 +624,10 @@ public:
             {
                 dReg.now_code = memo.get_instruction(pc - 4);
                 dReg.pc = pc - 4;
+                if(dReg.now_code == END)
+                {
+                    isend = 1;
+                }
             }
         }
     }
@@ -683,10 +689,18 @@ public:
             WB();
             MEM();
             EXE();
+            if(isend) break;
             ID();
             IF();
             if(dReg.now_code == END)
                 break;
+        }
+        if(isend)
+        {
+            WB();
+            MEM();
+            WB();
+            return ((unsigned int)Reg[10]) & 255u;
         }
         WB();
         MEM();
