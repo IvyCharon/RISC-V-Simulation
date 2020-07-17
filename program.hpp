@@ -21,6 +21,7 @@ class program
     {
         bool a[2] = {1,1};
         int pos_c = 0;
+        int suc = 0, fail = 0;
 
         void push(bool x)
         {
@@ -629,11 +630,16 @@ public:
         }
         if(branch(eReg.type))
         {
-            if(pc - 4 == bpc.pos_c) return;
+            if(pc - 4 == bpc.pos_c)
+            {
+                bpc.suc ++;
+                return;
+            } 
             else
             {
                 dReg.now_code = memo.get_instruction(pc - 4);
                 dReg.pc = pc - 4;
+                bpc.fail ++;
                 if(dReg.now_code == END)
                 {
                     isend = 1;
@@ -719,5 +725,15 @@ public:
         MEM();
         WB();
         return ((unsigned int)Reg[10]) & 255u;
+    }
+
+    double success_rate()
+    {
+        if(bpc.suc == 0 && bpc.fail == 0)
+        {
+            cout<<"no prediction!\n";
+            return -1;
+        }
+        return (double)bpc.suc / (bpc.suc + bpc.fail);
     }
 };
