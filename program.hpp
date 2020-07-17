@@ -64,6 +64,7 @@ class program
     {
         int imm = 0;
         int data1 = 0, data2 = 0;
+        bool d1 = 0, d2 = 0;
         int shamt = 0;
         Types type = (Types)NOType;
         int rs1 = 0, rs2 = 0, rd = 0;
@@ -392,8 +393,8 @@ public:
             case SRAI:
                 if(eReg.rs1 == mReg.rd)
                 {
-                    eReg.type = NOType;
-                    pc -= 4;
+                    eReg.data1 = mReg.data;
+                    eReg.d1 = 1;
                 }
                 break;
             case BEQ:
@@ -415,10 +416,15 @@ public:
             case SRA:
             case OR:
             case AND:
-                if(eReg.rs1 == mReg.rd || eReg.rs2 == mReg.rd)
+                if(eReg.rs1 == mReg.rd)
                 {
-                    eReg.type = NOType;
-                    pc -= 4;
+                    eReg.data1 = mReg.data;
+                    eReg.d1 = 1;
+                }
+                else if(eReg.rs2 == mReg.rd)
+                {
+                    eReg.data2 = mReg.data;
+                    eReg.d2 = 1;
                 }
                 break;
             default:
@@ -436,7 +442,11 @@ public:
         mReg.type = eReg.type;
         if(eReg.type == NOType) return;
         mReg.rd = eReg.rd; mReg.rs1 = eReg.rs1; mReg.rs2 = eReg.rs2;
-        eReg.data1 = Reg[eReg.rs1]; eReg.data2 = Reg[eReg.rs2];
+        if(!eReg.d1)
+            eReg.data1 = Reg[eReg.rs1];
+        if(!eReg.d2)
+            eReg.data2 = Reg[eReg.rs2];
+        eReg.d1 = eReg.d2 = 0;
         switch (eReg.type)
         {
         case LUI:
